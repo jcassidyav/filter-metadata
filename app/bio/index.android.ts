@@ -1,8 +1,6 @@
 import { BiometricIDAvailableResult, ERROR_CODES, BiometricApi, BiometricResult, VerifyBiometricOptions } from './common';
 import { Application, AndroidActivityResultEventData, Utils, AndroidApplication } from '@nativescript/core';
 
-declare const com: any;
-
 const KEY_NAME = 'biometricprintauth';
 const SECRET_BYTE_ARRAY = Array.create('byte', 16);
 const REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 788; // arbitrary
