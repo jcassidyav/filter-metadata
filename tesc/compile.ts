@@ -5,7 +5,7 @@ const project = new Project({
     
 });
 
-const identified = new Map<string,string>();
+const identified = new Map<string,{kind:string, declared:string}>();
 
 function logDetails(node, symbol){
 
@@ -15,18 +15,20 @@ function logDetails(node, symbol){
   const kindName = symbol?.getDeclarations()[0].getKindName();
   const symbolName = symbol?.getFullyQualifiedName();
 
-  console.log("Parent is:",checkParent);
+  if(false) {
+    console.log("Parent is:",checkParent);
 
-  console.log("Symbol declared in:",filePath);
-  console.log("Symbol: symbol name",symbolName);
-  console.log("Symbol Type", symbol?.getDeclaredType().getText())
-  console.log("Location", node.getSourceFile().getFilePath());
-  console.log("node Type",node.getType().getText() );
-  console.log("node Type 2", symbol?.getDeclarations()[0].getKindName())
-
-  if(kindName === "ClassDeclaration" || kindName === "MethodDeclaration") {
-    identified.set(symbolName, kindName);
+    console.log("Symbol declared in:",filePath);
+    console.log("Symbol: symbol name",symbolName);
+    console.log("Symbol Type", symbol?.getDeclaredType().getText())
+    console.log("Location", node.getSourceFile().getFilePath());
+    console.log("node Type",node.getType().getText() );
+    console.log("node Type 2", symbol?.getDeclarations()[0].getKindName())
   }
+
+  if(kindName === "ClassDeclaration" || kindName === "MethodDeclaration" || kindName ==="PropertyDeclaration") {
+    identified.set(symbolName, {kind:kindName, declared: filePath});
+  } 
 
 }
 
@@ -37,7 +39,10 @@ project.getSourceFiles().forEach((sourceFile) => {
     if(node.getText() == "packageId"){
       console.log("Location package", node.getSourceFile().getFilePath())
     }
+
+
     const symbol = node.getSymbol();
+
     if(symbol){
       const decl = symbol?.getDeclarations();
       if(decl && decl.length > 0) {
@@ -45,10 +50,10 @@ project.getSourceFiles().forEach((sourceFile) => {
         const kindName = symbol?.getDeclarations()[0].getKindName();
         const symbolName = symbol?.getFullyQualifiedName();
 
-        if(kindName === "ClassDeclaration" || kindName === "MethodDeclaration") {
+        if(kindName === "ClassDeclaration" || kindName === "MethodDeclaration" || kindName ==="PropertyDeclaration") {
 
-          if( filePath?.includes("android.d.ts") &&  !node.getSourceFile().getFilePath().includes(".d.ts")) {
-            console.log("********  Interesting Node ***************");
+          if( (filePath?.includes("@nativescript/types") || filePath?.includes("android.d.ts")) &&  !node.getSourceFile().getFilePath().includes(".d.ts")) {
+         //   console.log("********  Interesting Node ***************");
           //  console.log("node", node.getType().getCallSignatures()[0].getReturnType().getSymbol()?.getFullyQualifiedName())
             logDetails(node, symbol);
 
@@ -58,11 +63,11 @@ project.getSourceFiles().forEach((sourceFile) => {
               const decl = symbol?.getDeclarations()[0] as MethodDeclaration;
               const returnTypeSymbol = decl.getReturnType().getSymbol();
               const returnSymbolNode = decl.getReturnTypeNode();
-              console.log("******   Return Type ************")
+           //   console.log("******   Return Type ************")
               logDetails(returnSymbolNode, returnTypeSymbol);
 
               // get param type
-              console.log("******   Parameters ************")
+          //    console.log("******   Parameters ************")
               decl.getParameters().forEach((value) => {
 
                   logDetails(value.getTypeNode(), value.getType().getSymbol());
@@ -81,5 +86,5 @@ project.getSourceFiles().forEach((sourceFile) => {
 
 console.log("*********** Identified *************")
 identified.forEach((value, key) => {
-  console.log(key, value);
+  console.log(key, JSON.stringify(value));
 })
